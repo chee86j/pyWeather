@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 import os
 from dotenv import load_dotenv
+import datetime
 
 load_dotenv()
 
@@ -18,9 +19,14 @@ def get_weather(city_name, api_key):
         weather_data = {
             "temperature": data["main"]["temp"],
             "humidity": data["main"]["humidity"],
-            "description": data["weather"][0]["description"],
+            "description": data["weather"][0]["description"].title(),  # Cap first letter of each word
+            "wind_speed": data["wind"]["speed"],
+            "sunrise": datetime.datetime.fromtimestamp(data["sys"]["sunrise"]).strftime('%Y-%m-%d %H:%M:%S'),
+            "sunset": datetime.datetime.fromtimestamp(data["sys"]["sunset"]).strftime('%Y-%m-%d %H:%M:%S'),
             "city": data["name"],
-            "country": data["sys"]["country"]
+            "country": data["sys"]["country"],
+            "pressure": data["main"]["pressure"],
+            "cloudiness": data["clouds"]["all"]
         }
         return weather_data, None
     else:
@@ -35,7 +41,7 @@ class WeatherApp(QWidget):
 
     def init_ui(self):
         self.setWindowTitle("Weather App")
-        self.setGeometry(100, 100, 400, 300)
+        self.setGeometry(100, 100, 600, 400)
 
         layout = QVBoxLayout()
 
@@ -74,7 +80,7 @@ class WeatherApp(QWidget):
             self.display_units = "imperial"
             self.unit_button.setText("Switch to Metric")
 
-        # Fetch weather data again to update the display
+        # Fetch data again to update the display
         self.get_weather_clicked()
 
     def get_weather_clicked(self):
@@ -98,15 +104,28 @@ class WeatherApp(QWidget):
     def display_weather(self, weather):
         if self.display_units == "imperial":
             temperature_unit = "°F"
-            temperature = weather["temperature"]
+            wind_speed_unit = "mph"
+            visibility_unit = "miles"
+            pressure_unit = "hPa"
         else:
             temperature_unit = "°C"
-            temperature = (weather["temperature"] - 32) * 5/9
+            wind_speed_unit = "m/s"
+            visibility_unit = "meters"
+            pressure_unit = "hPa"
+
+        temperature = weather['temperature']
+        if self.display_units == "metric":
+            temperature = (temperature - 32) * 5/9
 
         message = f"Weather in {weather['city']}, {weather['country']}:\n"
-        message += f"Temperature: {temperature:.2f}{temperature_unit}\n"
+        message += f"Temperature: {temperature:.2f} {temperature_unit}\n"
         message += f"Humidity: {weather['humidity']}%\n"
-        message += f"Description: {weather['description']}"
+        message += f"Description: {weather['description']}\n"
+        message += f"Wind Speed: {weather['wind_speed']} {wind_speed_unit}\n"
+        message += f"Pressure: {weather['pressure']} {pressure_unit}\n"
+        message += f"Cloudiness: {weather['cloudiness']}%\n"
+        message += f"Sunrise: {weather['sunrise']}\n"
+        message += f"Sunset: {weather['sunset']}"
         self.weather_display.setText(message)
 
 def main():

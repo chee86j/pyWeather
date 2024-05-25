@@ -4,18 +4,24 @@ A simple Python script that fetches the weather from OpenWeatherMap API and disp
 
 ## Pre-requisites
 
-1. Ensure you have Python 3 installed on your system (https://www.python.org/downloads/)
-2. OpenWeatherMap API key (Get it [here](https://home.openweathermap.org/users/sign_up))
+1. Ensure you have Python 3 installed on your system
+   (https://www.python.org/downloads/)
+
+2. OpenWeatherMap API key
+   (https://home.openweathermap.org/users/sign_up)
 
 ## Installation
 
 1. Clone the repository and cd into the project directory
 
 2. Install the required dependencies using the command
-   'pip install PySide6 requests python-dotenv'
+   'pip3 install PySide6 requests python-dotenv'
 
-3. Run the script from the terminal using the command
-   'python pyWeather.py'
+3. Ensure your API_KEY is stored in a .env file in the root directory of the project
+   API_KEY=your_api_key_here
+
+4. Run the script from the terminal using the command
+   'python3 pyWeather.py'
 
 ## Usage
 
