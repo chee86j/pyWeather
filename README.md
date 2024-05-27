@@ -1,6 +1,23 @@
 # pyWeather
 
-A simple Python script that fetches the weather from OpenWeatherMap API and displays it in the terminal.
+pyWeather is a Python application designed to keep you informed about the latest weather conditions. Leveraging the OpenWeatherMap API, pyWeather fetches real-time weather data for any city worldwide and presents it in a user-friendly interface.
+
+### Key Features
+
+Real-time Weather Updates
+Stay up-to-date with the current weather conditions for your chosen city. pyWeather fetches and displays crucial information such as temperature, humidity, wind speed, pressure, cloudiness, sunrise, and sunset.
+
+### Hourly Weather Forecast
+
+Plan your day effectively with the hourly weather forecast feature. Get detailed insights into the weather trends for the next 12 hours.
+
+### Intuitive User Interface
+
+Enjoy a seamless user experience with pyWeather's intuitive graphical interface built using PySide6. With input fields for city selection and interactive buttons for weather retrieval and unit switching, pyWeather caters to users of all skill levels.
+
+### Unit Flexibility
+
+Customize your weather experience by toggling between imperial and metric units. Whether you prefer Fahrenheit or Celsius, miles or kilometers, pyWeather adapts to your preferences effortlessly.
 
 ## Pre-requisites
 

@@ -1,20 +1,25 @@
-import sys
-import requests
+import sys  # to access command line arguments
+import requests # to make HTTP requests
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox, QTextEdit
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox, QTextEdit, QComboBox
 )
 from PySide6.QtCore import Qt
-import os
-from dotenv import load_dotenv
-import datetime
+# Pyside6 for GUI
+import os # to access env vars
+from dotenv import load_dotenv # to load env vars from .env file
+import datetime # to work with timestamps
 
-load_dotenv()
+load_dotenv() # Load env vars from .env file
 
-def get_weather(city_name, api_key):
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={city_name}&units=imperial&appid={api_key}"
+# Function to fetch weather data from the API
+def get_weather(city, state, country_code, api_key):
+    query = f"{city},{state},{country_code}" if state else f"{city},{country_code}"
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={query}&units=imperial&appid={api_key}"
     response = requests.get(url)
     data = response.json()
+    # code above is to get the data from the API with the city name, state/province, country, and the API key & convert it to json
 
+    # if response successful, extract the data needed
     if response.status_code == 200:
         weather_data = {
             "temperature": data["main"]["temp"],
@@ -31,10 +36,12 @@ def get_weather(city_name, api_key):
         return weather_data, None
     else:
         error_message = data.get("message", "Unknown error")
-        return None, error_message
+        return None, error_message # if successful, return the data, else return the error message
 
-def get_hourly_weather(city_name, api_key):
-    url = f"http://api.openweathermap.org/data/2.5/forecast?q={city_name}&units=imperial&appid={api_key}"
+# Function to fetch hourly weather data from the API
+def get_hourly_weather(city, state, country_code, api_key):
+    query = f"{city},{state},{country_code}" if state else f"{city},{country_code}"
+    url = f"http://api.openweathermap.org/data/2.5/forecast?q={query}&units=imperial&appid={api_key}"
     response = requests.get(url)
     data = response.json()
 
@@ -49,7 +56,9 @@ def get_hourly_weather(city_name, api_key):
     else:
         error_message = data.get("message", "Unknown error")
         return None, error_message
+    # if successful, return the hourly weather extracted data, else return the error message
 
+# Main Weather App GUI using the Constructor of the QWidget class
 class WeatherApp(QWidget):
     def __init__(self):
         super().__init__()
@@ -61,21 +70,37 @@ class WeatherApp(QWidget):
     def init_ui(self):
         self.setWindowTitle("Weather App")
         self.setGeometry(100, 100, 800, 400)
+        # set window title, position and size
 
-        layout = QVBoxLayout()
+        layout = QVBoxLayout() # create a vertical layout
 
         # City input
         city_layout = QHBoxLayout()
-        city_label = QLabel("Enter city name:")
+        city_label = QLabel("Enter City Name:")
         self.city_edit = QLineEdit()
         city_layout.addWidget(city_label)
         city_layout.addWidget(self.city_edit)
+
+        # State/Province input
+        state_layout = QHBoxLayout()
+        state_label = QLabel("Enter State/Province (Optional):")
+        self.state_edit = QLineEdit()
+        state_layout.addWidget(state_label)
+        state_layout.addWidget(self.state_edit)
+
+        # Country input
+        country_layout = QHBoxLayout()
+        country_label = QLabel("Select Country:")
+        self.country_combobox = QComboBox()
+        self.populate_country_combobox()
+        country_layout.addWidget(country_label)
+        country_layout.addWidget(self.country_combobox)
 
         # Weather display
         self.weather_display = QTextEdit()
         self.weather_display.setReadOnly(True)
 
-        # Buttons
+        # Buttons & Layout
         button_layout = QHBoxLayout()
         self.get_weather_button = QPushButton("Get Weather")
         self.get_weather_button.clicked.connect(self.get_weather_clicked)
@@ -84,13 +109,13 @@ class WeatherApp(QWidget):
         button_layout.addWidget(self.get_weather_button)
         button_layout.addWidget(self.hourly_weather_button)
 
-        # Previous and Next buttons (initially hidden)
+        # Previous & Next buttons (initially hidden)
         self.prev_button = QPushButton("Previous")
         self.prev_button.clicked.connect(self.show_previous_hours)
-        self.prev_button.hide()  # Initially hidden
+        self.prev_button.hide()
         self.next_button = QPushButton("Next")
         self.next_button.clicked.connect(self.show_next_hours)
-        self.next_button.hide()  # Initially hidden
+        self.next_button.hide()
         button_layout.addWidget(self.prev_button)
         button_layout.addWidget(self.next_button)
 
@@ -101,11 +126,25 @@ class WeatherApp(QWidget):
 
         # Add layouts to main layout
         layout.addLayout(city_layout)
+        layout.addLayout(state_layout)
+        layout.addLayout(country_layout)
         layout.addWidget(self.weather_display)
         layout.addLayout(button_layout)
 
         self.setLayout(layout)
 
+    # Function to populate the country dropdown list
+    def populate_country_combobox(self):
+        country_url = "https://restcountries.com/v2/all" # URL to fetch all countries
+        response = requests.get(country_url)
+        if response.status_code == 200:
+            countries = response.json()
+            for country in countries:
+                self.country_combobox.addItem(country["name"])
+        else:
+            QMessageBox.warning(self, "Error", "Failed to fetch country data. Please try again later.")
+
+    # Function to switch between imperial & metric units
     def switch_units(self):
         if self.display_units == "imperial":
             self.display_units = "metric"
@@ -118,8 +157,11 @@ class WeatherApp(QWidget):
         self.get_weather_clicked()
 
     def get_weather_clicked(self):
-        city_name = self.city_edit.text().strip()
-        if not city_name:
+        city = self.city_edit.text().strip()
+        state = self.state_edit.text().strip()
+        country = self.country_combobox.currentText().strip()
+
+        if not city:
             QMessageBox.warning(self, "Warning", "Please enter a city name.")
             return
 
@@ -128,16 +170,20 @@ class WeatherApp(QWidget):
             QMessageBox.warning(self, "Error", "API key was not found. Ensure API_KEY is in .env file")
             return
 
-        weather, error_message = get_weather(city_name, api_key)
+        weather, error_message = get_weather(city, state, country, api_key)
 
         if weather:
             self.display_weather(weather)
         else:
             QMessageBox.warning(self, "Error", f"Failed to fetch weather data. Error: {error_message}")
 
+    # Function to handle the Show Hourly Weather button & display the hourly weather
     def show_hourly_weather(self):
-        city_name = self.city_edit.text().strip()
-        if not city_name:
+        city = self.city_edit.text().strip()
+        state = self.state_edit.text().strip()
+        country = self.country_combobox.currentText().strip()
+
+        if not city:
             QMessageBox.warning(self, "Warning", "Please enter a city name.")
             return
 
@@ -146,7 +192,7 @@ class WeatherApp(QWidget):
             QMessageBox.warning(self, "Error", "API key was not found. Ensure API_KEY is in .env file")
             return
 
-        self.hourly_weather, error_message = get_hourly_weather(city_name, api_key)
+        self.hourly_weather, error_message = get_hourly_weather(city, state, country, api_key)
 
         if self.hourly_weather:
             self.current_page = 0
@@ -166,6 +212,7 @@ class WeatherApp(QWidget):
             self.current_page += 1
             self.display_hourly_weather()
 
+    # Function to display hourly weather data
     def display_weather(self, weather):
         if self.display_units == "imperial":
             temperature_unit = "°F"
@@ -203,11 +250,13 @@ class WeatherApp(QWidget):
 
         self.weather_display.setText(message)
 
+# Main function to initialize app
 def main():
     app = QApplication(sys.argv)
     weather_app = WeatherApp()
     weather_app.show()
     sys.exit(app.exec())
 
+# Entry point of the app. This is common in Python scripts to run the main function
 if __name__ == "__main__":
     main()
