@@ -72,55 +72,69 @@ class WeatherApp(QWidget):
         self.setGeometry(100, 100, 800, 400)
         # set window title, position and size
 
-        layout = QVBoxLayout() # create a vertical layout
+        layout = QVBoxLayout()  # create a vertical layout
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(15)
 
         # City input
         city_layout = QHBoxLayout()
         city_label = QLabel("Enter City Name:")
+        city_label.setStyleSheet("font-weight: bold; font-size: 14px;")
         self.city_edit = QLineEdit()
+        self.city_edit.setPlaceholderText("City")
         city_layout.addWidget(city_label)
         city_layout.addWidget(self.city_edit)
 
         # State/Province input
         state_layout = QHBoxLayout()
         state_label = QLabel("Enter State/Province (Optional):")
+        state_label.setStyleSheet("font-weight: bold; font-size: 14px;")
         self.state_edit = QLineEdit()
+        self.state_edit.setPlaceholderText("State/Province")
         state_layout.addWidget(state_label)
         state_layout.addWidget(self.state_edit)
 
         # Country input
         country_layout = QHBoxLayout()
         country_label = QLabel("Select Country:")
+        country_label.setStyleSheet("font-weight: bold; font-size: 14px;")
         self.country_combobox = QComboBox()
-        self.populate_country_combobox()
+        self.populate_country_combobox()  # populate the country dropdown list
         country_layout.addWidget(country_label)
         country_layout.addWidget(self.country_combobox)
 
         # Weather display
         self.weather_display = QTextEdit()
         self.weather_display.setReadOnly(True)
+        self.weather_display.setStyleSheet("font-size: 16px; padding: 10px;")
 
         # Buttons & Layout
         button_layout = QHBoxLayout()
         self.get_weather_button = QPushButton("Get Weather")
+        self.get_weather_button.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold;")
         self.get_weather_button.clicked.connect(self.get_weather_clicked)
         self.hourly_weather_button = QPushButton("Show Hourly Weather")
+        self.hourly_weather_button.setStyleSheet("background-color: #2196F3; color: white; font-weight: bold;")
         self.hourly_weather_button.clicked.connect(self.show_hourly_weather)
         button_layout.addWidget(self.get_weather_button)
         button_layout.addWidget(self.hourly_weather_button)
 
         # Previous & Next buttons (initially hidden)
         self.prev_button = QPushButton("Previous")
+        self.prev_button.setStyleSheet("background-color: #f44336; color: white; font-weight: bold;")
         self.prev_button.clicked.connect(self.show_previous_hours)
         self.prev_button.hide()
         self.next_button = QPushButton("Next")
+        self.next_button.setStyleSheet("background-color: #f44336; color: white; font-weight: bold;")
         self.next_button.clicked.connect(self.show_next_hours)
         self.next_button.hide()
         button_layout.addWidget(self.prev_button)
+        button_layout
         button_layout.addWidget(self.next_button)
 
         # Unit button
         self.unit_button = QPushButton("Switch Units")
+        self.unit_button.setStyleSheet("background-color: #FFC107; color: white; font-weight: bold;")
         self.unit_button.clicked.connect(self.switch_units)
         button_layout.addWidget(self.unit_button)
 
